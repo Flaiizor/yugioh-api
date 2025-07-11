@@ -18,6 +18,7 @@ public class Card {
     private Integer level;
     private String attribute;
     private Integer scale;
+    private String pend_desc;
     private Integer linkval;
     private List<String> linkmarkers;
 
