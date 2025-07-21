@@ -10,11 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -52,27 +48,18 @@ public class CardController {
         return ResponseEntity.ok(minimal ? CardMapper.toSpellTrapDTO(card) : CardMapper.toDTO(card));
     }
 
-    @Operation(
-            summary = "Search cards with optional filters",
-            description = "Search for cards using multiple optional filters such as name, banlist, race, type, etc. " +
-                    "You can also sort the results using `sortBy` and `sortOrder`."
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Cards found and returned successfully"),
-            @ApiResponse(responseCode = "404", description = "No cards found with the specified criteria")
-    })
     @GetMapping("/search")
     public ResponseEntity<List<CardDTO>> searchCards(
-            @Parameter(description = "Partial name of the card") @RequestParam(required = false) String partialName,
-            @Parameter(description = "Banlist format (tcg, ocg, goat)") @RequestParam(required = false) String banlist,
-            @Parameter(description = "Banlist status (forbidden, limited, semi-limited)") @RequestParam(required = false) String banlistStatus,
-            @Parameter(description = "Race of the card, e.g. Fiend") @RequestParam(required = false) String race,
-            @Parameter(description = "Card type (e.g. Effect Monster, Spell Card)") @RequestParam(required = false) String type,
-            @Parameter(description = "Archetype name") @RequestParam(required = false) String archetype,
-            @Parameter(description = "Monster level or rank") @RequestParam(required = false) Integer level,
-            @Parameter(description = "Card attribute (e.g. DARK, LIGHT)") @RequestParam(required = false) String attribute,
-            @Parameter(description = "Field to sort by (e.g. name, atk, level)") @RequestParam(required = false) String sortBy,
-            @Parameter(description = "Sort order: asc or desc") @RequestParam(defaultValue = "asc") String sortOrder) {
+            @RequestParam(required = false) String partialName,
+            @RequestParam(required = false) String banlist,
+            @RequestParam(required = false) String banlistStatus,
+            @RequestParam(required = false) String race,
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String archetype,
+            @RequestParam(required = false) Integer level,
+            @RequestParam(required = false) String attribute,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(defaultValue = "asc") String sortOrder) {
 
         List<CardQuery> queryList = new ArrayList<>();
         if (partialName != null) queryList.add(new PartialNameQuery(partialName));

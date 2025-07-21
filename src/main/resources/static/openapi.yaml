@@ -1,0 +1,220 @@
+openapi: 3.0.3
+info:
+  title: Yugioh Card Search API
+  version: 1.0.0
+  description: |
+    This API allows you to search for Yugioh cards with multiple filters including banlist, race, type, level, attribute, and more.
+
+servers:
+  - url: http://localhost:8080
+
+paths:
+  /api/cards/name/{name}:
+    get:
+      summary: Get card by exact name
+      parameters:
+        - name: name
+          in: path
+          description: Exact name of the card
+          required: true
+          schema:
+            type: string
+        - name: minimal
+          in: query
+          description: Return minimal DTO if true
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Card found
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/MonsterCardDTO'
+                  - $ref: '#/components/schemas/SpellTrapCardDTO'
+                  - $ref: '#/components/schemas/PendulumMonsterDTO'
+                  - $ref: '#/components/schemas/LinkMonsterDTO'
+        '404':
+          description: Card not found
+
+  /api/cards/search:
+    get:
+      summary: Search for cards using multiple filters
+      parameters:
+        - name: partialName
+          in: query
+          description: Partial name of the card
+          required: false
+          schema:
+            type: string
+
+        - name: banlist
+          in: query
+          description: Banlist format (e.g., tcg, ocg, goat)
+          required: false
+          schema:
+            type: string
+            enum: [tcg, ocg, goat]
+
+        - name: banlistStatus
+          in: query
+          description: Filter by status in the given banlist (forbidden, limited, semi-limited)
+          required: false
+          schema:
+            type: string
+            enum: [forbidden, limited, semi-limited]
+
+        - name: race
+          in: query
+          description: The race of the card (e.g., Warrior, Dragon)
+          required: false
+          schema:
+            type: string
+
+        - name: type
+          in: query
+          description: The type of the card (e.g., Spell Card, Effect Monster)
+          required: false
+          schema:
+            type: string
+
+        - name: archetype
+          in: query
+          description: The archetype of the card (e.g., Blue-Eyes)
+          required: false
+          schema:
+            type: string
+
+        - name: level
+          in: query
+          description: Level or rank of the monster
+          required: false
+          schema:
+            type: integer
+
+        - name: attribute
+          in: query
+          description: Attribute of the monster (e.g., DARK, LIGHT)
+          required: false
+          schema:
+            type: string
+
+        - name: sortBy
+          in: query
+          description: Field to sort results by (e.g., name, level, atk)
+          required: false
+          schema:
+            type: string
+
+        - name: sortOrder
+          in: query
+          description: Order of sorting (asc or desc)
+          required: false
+          schema:
+            type: string
+            enum: [asc, desc]
+
+      responses:
+        '200':
+          description: List of cards matching the search filters
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  oneOf:
+                    - $ref: '#/components/schemas/MonsterCardDTO'
+                    - $ref: '#/components/schemas/SpellTrapCardDTO'
+                    - $ref: '#/components/schemas/PendulumMonsterDTO'
+                    - $ref: '#/components/schemas/LinkMonsterDTO'
+
+        '404':
+          description: No cards found matching the criteria
+
+components:
+  schemas:
+    SpellTrapCardDTO:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Vanity's Emptiness
+        type:
+          type: string
+          example: Trap Card
+        desc:
+          type: string
+          example: 'Neither player can Special Summon monsters. If a card is sent from the Deck or the field to your Graveyard: Destroy this card.'
+        race:
+          type: string
+          example: Continuous
+        banlistInfo:
+          $ref: '#/components/schemas/BanlistInfo'
+
+    MonsterCardDTO:
+      allOf:
+        - $ref: '#/components/schemas/SpellTrapCardDTO'
+        - type: object
+          properties:
+            attribute:
+              type: string
+              example: EARTH
+            level:
+              type: integer
+              example: 7
+            atk:
+              type: integer
+              example: 2600
+            def:
+              type: integer
+              example: 2300
+
+    PendulumMonsterDTO:
+      allOf:
+        - $ref: '#/components/schemas/MonsterCardDTO'
+        - type: object
+          properties:
+            scale:
+              type: integer
+              example: 4
+            pend_desc:
+              type: string
+
+    LinkMonsterDTO:
+      allOf:
+        - $ref: '#/components/schemas/SpellTrapCardDTO'
+        - type: object
+          properties:
+            attribute:
+              type: string
+              example: LIGHT
+            atk:
+              type: integer
+              example: 2500
+            linkval:
+              type: integer
+              example: 4
+            linkmarkers:
+              type: array
+              items:
+                type: string
+                example: Top, Left, Right, Bottom
+
+    BanlistInfo:
+      type: object
+      properties:
+        ban_tcg:
+          type: string
+          nullable: true
+          example: semi-limited
+        ban_ocg:
+          type: string
+          nullable: true
+          example: forbidden
+        ban_goat:
+          type: string
+          nullable: true
+          example: limited
