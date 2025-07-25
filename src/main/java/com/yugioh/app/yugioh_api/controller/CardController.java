@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/cards")
@@ -70,7 +71,7 @@ public class CardController {
         if (level != null) queryList.add(new LevelQuery(level));
         if (attribute != null) queryList.add(new AttributeQuery(attribute));
 
-        List<Card> cards = fetchCards(new CompositeQuery(queryList));
+        List<Card> cards = new ArrayList<>(fetchCards(new CompositeQuery(queryList)));
         if (cards.isEmpty()) return ResponseEntity.notFound().build();
 
         if (banlist != null && banlistStatus != null) {
@@ -86,7 +87,7 @@ public class CardController {
                             default -> false;
                         };
                     })
-                    .toList();
+                    .collect(Collectors.toCollection(ArrayList::new));
         }
 
         if (sortBy != null) {
